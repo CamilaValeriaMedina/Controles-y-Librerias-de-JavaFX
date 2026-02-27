@@ -1,0 +1,138 @@
+package com.ejemplo.javafxlibreriasdemo.controllers;
+
+import com.ejemplo.javafxlibreriasdemo.model.Usuario;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+
+public class PrincipalController {
+    private ObservableList<Usuario> usuarios;
+
+    private TableView<Usuario> tablaUsuarios;
+    private TableColumn<Usuario, String> colNombre;
+    private TableColumn<Usuario, String> colEmail;
+    private TableColumn<Usuario, String> colTelefono;
+    private TableColumn<Usuario, Boolean> colActivo;
+
+    private TextField txtNombre;
+    private TextField txtEmail;
+    private TextField txtTelefono;
+    private CheckBox chkActivo;
+
+    public PrincipalController() {
+        inicializarDatos();
+    }
+
+    private void inicializarDatos() {
+        usuarios = FXCollections.observableArrayList();
+        usuarios.add(new Usuario("Juan Pérez", "juan@email.com", "555-1234", true));
+        usuarios.add(new Usuario("María García", "maria@email.com", "555-5678", true));
+        usuarios.add(new Usuario("Carlos López", "carlos@email.com", "555-9012", false));
+    }
+
+    public void configurarTabla() {
+        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+        colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+        colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
+        colActivo.setCellValueFactory(new PropertyValueFactory<>("activo"));
+
+        colActivo.setCellFactory(col -> new TableCell<Usuario, Boolean>() {
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item ? "Sí" : "No");
+                }
+            }
+        });
+
+        tablaUsuarios.setItems(usuarios);
+
+        tablaUsuarios.getSelectionModel().selectedItemProperty().addListener(
+                (obs, oldSelection, newSelection) -> {
+                    if (newSelection != null) {
+                        cargarUsuarioEnFormulario(newSelection);
+                    }
+                }
+        );
+    }
+
+    private void cargarUsuarioEnFormulario(Usuario usuario) {
+        txtNombre.setText(usuario.getNombre());
+        txtEmail.setText(usuario.getEmail());
+        txtTelefono.setText(usuario.getTelefono());
+        chkActivo.setSelected(usuario.isActivo());
+    }
+
+    public void guardarUsuario() {
+        if (txtNombre.getText().trim().isEmpty() ||
+                txtEmail.getText().trim().isEmpty()) {
+            mostrarAlerta("Error", "Nombre y email son obligatorios", Alert.AlertType.ERROR);
+            return;
+        }
+
+        Usuario usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
+
+        if (usuarioSeleccionado != null) {
+         
+            usuarioSeleccionado.setNombre(txtNombre.getText());
+            usuarioSeleccionado.setEmail(txtEmail.getText());
+            usuarioSeleccionado.setTelefono(txtTelefono.getText());
+            usuarioSeleccionado.setActivo(chkActivo.isSelected());
+            tablaUsuarios.refresh();
+            mostrarAlerta("Éxito", "Usuario actualizado", Alert.AlertType.INFORMATION);
+        } else {
+            
+            Usuario nuevoUsuario = new Usuario(
+                    txtNombre.getText(),
+                    txtEmail.getText(),
+                    txtTelefono.getText(),
+                    chkActivo.isSelected()
+            );
+            usuarios.add(nuevoUsuario);
+            mostrarAlerta("Éxito", "Usuario agregado", Alert.AlertType.INFORMATION);
+        }
+
+        limpiarFormulario();
+    }
+
+    public void eliminarUsuario() {
+        Usuario usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
+        if (usuarioSeleccionado != null) {
+            usuarios.remove(usuarioSeleccionado);
+            limpiarFormulario();
+            mostrarAlerta("Éxito", "Usuario eliminado", Alert.AlertType.INFORMATION);
+        } else {
+            mostrarAlerta("Advertencia", "Seleccione un usuario", Alert.AlertType.WARNING);
+        }
+    }
+
+    public void limpiarFormulario() {
+        txtNombre.clear();
+        txtEmail.clear();
+        txtTelefono.clear();
+        chkActivo.setSelected(false);
+        tablaUsuarios.getSelectionModel().clearSelection();
+    }
+
+    private void mostrarAlerta(String titulo, String mensaje, Alert.AlertType tipo) {
+        Alert alert = new Alert(tipo);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
+    public void setTablaUsuarios(TableView<Usuario> tablaUsuarios) { this.tablaUsuarios = tablaUsuarios; }
+    public void setColNombre(TableColumn<Usuario, String> colNombre) { this.colNombre = colNombre; }
+    public void setColEmail(TableColumn<Usuario, String> colEmail) { this.colEmail = colEmail; }
+    public void setColTelefono(TableColumn<Usuario, String> colTelefono) { this.colTelefono = colTelefono; }
+    public void setColActivo(TableColumn<Usuario, Boolean> colActivo) { this.colActivo = colActivo; }
+    public void setTxtNombre(TextField txtNombre) { this.txtNombre = txtNombre; }
+    public void setTxtEmail(TextField txtEmail) { this.txtEmail = txtEmail; }
+    public void setTxtTelefono(TextField txtTelefono) { this.txtTelefono = txtTelefono; }
+    public void setChkActivo(CheckBox chkActivo) { this.chkActivo = chkActivo; }
+}
