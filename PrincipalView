@@ -1,0 +1,162 @@
+package com.ejemplo.javafxlibreriasdemo.views;
+
+import com.ejemplo.javafxlibreriasdemo.controllers.PrincipalController;
+import com.ejemplo.javafxlibreriasdemo.model.Usuario;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+
+public class PrincipalView {
+    private PrincipalController controller;
+    private BorderPane view;
+
+    // sus componentes.
+    private TableView<Usuario> tablaUsuarios;
+    private TableColumn<Usuario, String> colNombre;
+    private TableColumn<Usuario, String> colEmail;
+    private TableColumn<Usuario, String> colTelefono;
+    private TableColumn<Usuario, Boolean> colActivo;
+
+    private TextField txtNombre;
+    private TextField txtEmail;
+    private TextField txtTelefono;
+    private CheckBox chkActivo;
+
+    public PrincipalView() {
+        controller = new PrincipalController();
+        inicializarComponentes();
+        configurarComponentes();
+        view = crearVistaPrincipal();
+    }
+
+    private void inicializarComponentes() {
+        // para la tabla.
+        tablaUsuarios = new TableView<>();
+        colNombre = new TableColumn<>("Nombre");
+        colEmail = new TableColumn<>("Email");
+        colTelefono = new TableColumn<>("Teléfono");
+        colActivo = new TableColumn<>("Activo");
+
+        // para el formulario.
+        txtNombre = new TextField();
+        txtEmail = new TextField();
+        txtTelefono = new TextField();
+        chkActivo = new CheckBox("Usuario activo");
+    }
+
+    private void configurarComponentes() {
+        colNombre.setPrefWidth(150);
+        colEmail.setPrefWidth(200);
+        colTelefono.setPrefWidth(100);
+        colActivo.setPrefWidth(80);
+
+        tablaUsuarios.getColumns().addAll(colNombre, colEmail, colTelefono, colActivo);
+
+        txtNombre.setPromptText("Ingrese nombre completo");
+        txtEmail.setPromptText("usuario@email.com");
+        txtTelefono.setPromptText("555-0000");
+
+        controller.setTablaUsuarios(tablaUsuarios);
+        controller.setColNombre(colNombre);
+        controller.setColEmail(colEmail);
+        controller.setColTelefono(colTelefono);
+        controller.setColActivo(colActivo);
+        controller.setTxtNombre(txtNombre);
+        controller.setTxtEmail(txtEmail);
+        controller.setTxtTelefono(txtTelefono);
+        controller.setChkActivo(chkActivo);
+
+        controller.configurarTabla();
+    }
+
+    private BorderPane crearVistaPrincipal() {
+        BorderPane root = new BorderPane();
+        root.setPadding(new Insets(10));
+        root.getStyleClass().add("bg-light"); // BootstrapFX class
+
+        Label titulo = new Label("Gestión de Usuarios");
+        FontIcon iconoTitulo = new FontIcon(FontAwesomeSolid.USER_FRIENDS);
+        iconoTitulo.setIconSize(32);
+        titulo.setGraphic(iconoTitulo);
+        titulo.getStyleClass().addAll("h1", "text-primary");
+
+        VBox tituloBox = new VBox(titulo);
+        tituloBox.setPadding(new Insets(0, 0, 10, 0));
+        root.setTop(tituloBox);
+        
+        VBox tablaBox = new VBox(5);
+        tablaBox.getChildren().addAll(
+                new Label("Lista de Usuarios") {{
+                    getStyleClass().addAll("h3", "text-info");
+                }},
+                tablaUsuarios
+        );
+        tablaBox.setPadding(new Insets(10));
+        tablaBox.getStyleClass().add("panel");
+
+        root.setCenter(tablaBox);
+        
+        VBox formBox = new VBox(10);
+        formBox.setPadding(new Insets(10));
+        formBox.setMaxWidth(350);
+        formBox.getStyleClass().add("panel");
+
+        Label lblFormTitulo = new Label("Formulario de Usuario");
+        lblFormTitulo.getStyleClass().addAll("h3", "text-info");
+
+        // BootstrapFX
+        VBox nombreBox = crearCampoFormulario("Nombre:", txtNombre);
+        VBox emailBox = crearCampoFormulario("Email:", txtEmail);
+        VBox telefonoBox = crearCampoFormulario("Teléfono:", txtTelefono);
+
+        chkActivo.getStyleClass().add("checkbox");
+
+        // botones
+        HBox buttonBox = new HBox(10);
+        buttonBox.setPadding(new Insets(15, 0, 0, 0));
+
+        Button btnGuardar = new Button("Guardar");
+        btnGuardar.setGraphic(new FontIcon(FontAwesomeSolid.SAVE));
+        btnGuardar.getStyleClass().addAll("btn", "btn-success");
+        btnGuardar.setOnAction(e -> controller.guardarUsuario());
+
+        Button btnEliminar = new Button("Eliminar");
+        btnEliminar.setGraphic(new FontIcon(FontAwesomeSolid.TRASH_ALT));
+        btnEliminar.getStyleClass().addAll("btn", "btn-danger");
+        btnEliminar.setOnAction(e -> controller.eliminarUsuario());
+
+        Button btnLimpiar = new Button("Limpiar");
+        btnLimpiar.setGraphic(new FontIcon(FontAwesomeSolid.ERASER));
+        btnLimpiar.getStyleClass().addAll("btn", "btn-secondary");
+        btnLimpiar.setOnAction(e -> controller.limpiarFormulario());
+
+        buttonBox.getChildren().addAll(btnGuardar, btnEliminar, btnLimpiar);
+
+        formBox.getChildren().addAll(
+                lblFormTitulo,
+                nombreBox,
+                emailBox,
+                telefonoBox,
+                chkActivo,
+                buttonBox
+        );
+
+        root.setRight(formBox);
+
+        return root;
+    }
+
+    private VBox crearCampoFormulario(String etiqueta, TextField campo) {
+        Label label = new Label(etiqueta);
+        label.getStyleClass().add("control-label");
+        campo.getStyleClass().add("form-control");
+        return new VBox(3, label, campo);
+    }
+
+    public Node getView() {
+        return view;
+    }
+}
